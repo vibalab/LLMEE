@@ -1,0 +1,198 @@
+body{
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin : 0px;
+}
+.container{
+    display : grid;
+    margin : 0;
+    height : 100vh;
+    grid-template-areas : 
+    "sidebar header header"
+    "sidebar main main"
+    "sidebar main main";
+    gap : 5px;
+    grid-template-columns: 200px auto;
+    grid-template-rows: 100px auto 30px;
+    
+}
+.section{
+    margin-top : 100px;
+}
+.item{
+    /* border : 3px solid black; */
+    text-align : center;
+    vertical-align: middle;
+    display : flex;
+    align-items:center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.header{
+    grid-area:header;
+    align-items: start;
+    padding : 20px;
+    margin-bottom: 0;
+    border : none;
+    /* color : #fff5ff; */
+    /* text-shadow : 1px 0px 5px rgb(212, 155, 155), -1px 0px 5px rgb(212, 155, 155), 0px 1px 5px rgb(212, 155, 155), 0px -1px 5px rgb(212, 155, 155) ;*/
+}
+
+.header h1{
+    background: linear-gradient(to right, #4e7cff, #83a4ff);
+    font-weight: bold;
+    background-clip: text;
+    color : transparent;
+    
+}
+.sidebar{
+    grid-area:sidebar;
+    gap : 50px;
+    font-size : 15px;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top : 50px;
+    text-align: center;
+    background-color: rgb(249,249,249);
+}
+select{
+    font-size : 15px;
+}
+.footer{
+    font-size : 10px;
+    opacity: 0.5;
+    height : 30px;
+}
+.main{
+    grid-area:main;
+    align-items : center;
+}
+
+label{
+    display: block;
+    margin:10px 0px;
+}
+
+input[type=text]{
+    font-size : 15px;
+    border-radius: 50px;
+    padding-left : 20px;
+    padding-right : 55px;
+    height : 40px;
+    border : 2px solid rgba(128, 128, 128, 0.358);
+    width : 700px;
+    background-color: rgba(152, 152, 152, 0.15);
+}
+
+input:focus{
+    outline : none;
+    border : 2px solid rgb(68, 171, 220);
+}
+
+#query{
+    font-size : 15px;
+    border-radius: 50px;
+    padding-left : 40px;
+    padding-right : 55px;
+    padding-top : 15px;
+    padding-bottom: 15px;
+    height : 15px;
+    border : 2px solid rgba(128, 128, 128, 0.358);
+    width : 700px;
+    background-color: rgba(152, 152, 152, 0.15);
+    overflow-y: hidden;
+    resize : none;
+}
+
+#query:focus{
+    outline : none;
+    border : 2px solid rgb(68, 171, 220);
+}
+
+.input-container{
+    display: flex;
+    margin-top : auto;
+    margin-bottom : 20px;
+    margin-left: 20px;
+    margin-right : 20px;
+    position: relative;
+    width: fit-content;
+    align-items: center;
+    
+}
+
+.result{
+    height : calc(100% - 50px);
+    width: 100%;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon{
+    position: absolute;
+    right: 20px;
+    bottom : 20%;
+    display : flex;
+    align-items: center;
+}
+
+.search-icon svg{
+    width : 25px;
+    cursor : pointer;
+    opacity: 0.5;
+}
+
+/* .search-icon::before {
+    content: ""; 
+    display: inline-block;
+    height: 30px;
+    width: 1.5px;
+    background-color: rgba(128, 128, 128, 0.517);
+    margin-right: 10px;
+} */
+
+select{
+    appearance: none;
+    font-size : 10px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: white;
+    color : #333;
+    cursor : pointer;
+    border-radius : 5px;
+    width : 150px;
+    text-align: left;
+    padding-left : 20px;
+    padding-top : 5px;
+    padding-bottom : 5px;
+    background-image: linear-gradient(45deg, transparent 50%, #333 50%),
+    linear-gradient(135deg, #333 50%, transparent 50%);
+    background-position: calc(100% - 20px) center, calc(100% - 15px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    /* padding-right: 40px; Adjust padding for custom arrow */
+}
+
+select:focus {
+    outline: none; /* Remove the default focus outline */
+    border-color: #666; /* Change border color on focus */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Add a shadow on focus */
+}
+
+option {
+    color: #333; /* Text color */
+    background-color: #fff; /* Background color */
+    padding: 10px; /* Padding inside options */
+    font-size: 16px; /* Font size */
+}
+
+.answer-area{
+    padding : 10px;
+    /* border : 1px solid grey; */
+    border-radius : 50px;
+    width : 90%;
+    height : 500px;
+    overflow:scroll;
+    text-align: left;
+}

@@ -1,7 +1,7 @@
 import os
 import threading
 from queue import Queue
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from transformers import AutoModelForImageClassification
 import torch
@@ -14,6 +14,11 @@ CORS(app)
 # Determine number of GPUs and create a queue for inference tasks
 num_gpus = torch.cuda.device_count()
 inference_queue = Queue()
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+    
 
 def _is_valid_explanation_method(method):
     # Valid explanation methods
