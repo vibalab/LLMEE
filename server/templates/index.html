@@ -8,87 +8,95 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/style.css">
 
 </head>
 <body>
+
     <div class="container">
-        <div class="header item">
-            <h1>LLM Visualization</h1>
-        </div>
         <div class="sidebar item">
+            <h1> LLM Visualization</h1>
+            <hr />
+            <div class="models">
+                <h2>Model</h2>
+                <div> Hugging Face List</div>
+                <div class="select-model" tabindex="0">
+                    <span class="select-button">Select Model</span>
+                    <div class="model-container"></div>
+                </div>
 
-            <div>
-                <!-- <label for="model">Model</label> -->
-                <select name="model" id="model" aria-placeholder="hi">
-                    <option value="" disabled selected>Model</option>
-                </select>
+                <div>Custom Model</div>
+                <input type="text" class="model-input" placeholder="Type Your Model Name">
+                
+                <div id="selected-models">
+                </div>
+
+                <div id="load-button" tabindex="0"> Load Model </div>
             </div>
 
-            <div>
-                <!-- <label for="dataset">Dataset</label> -->
-                <select name="dataset" id="dataset">
-                    <option value="" disabled selected>Dataset</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                </select>
-            </div>
+            <hr />
 
-            <div>
+
+            <div class="xai-wrap">
+                <h2>XAI Method</h2>
+                <div>
+                    <div id="xai" tabindex="0">
+                        <div class="selected-xai">XAI Method</div>
+                        <div class="xai-list">
+                            <div class="xai-item">Feature Ablation</div>
+                            <div class="xai-item">SHAP</div>
+                            <div class="xai-item">Kernel SHAP</div>
+                            <div class="xai-item">LIME</div>
+                        </div>
+                    </div>
+
+                </div>
                 <!-- <label for="XAI">XAI</label> -->
-                <select name="XAI" id="XAI">
+                <!-- <select name="XAI" id="XAI">
                     <option value="" disabled selected>XAI Method</option>
                     <option value="feature-ablation">Feature Ablation</option>
                     <option value="shap">SHAP</option>
                     <option value="kenel-shap">Kernel SHAP</option>
                     <option value="lime">LIME</option>
-                </select>
+                </select> -->
             </div>
+
+            <hr />
+            
         </div>
         <div class="main item">
+            <div class="input-container">
+                <!-- <input type="text" name="query" id="query"> -->
+                 <div class="query-input">
+                    Input Prompt <textarea name="query" class="query"></textarea>
+                 </div>
+                
+                <!-- <span class="search-icon">
+                    <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 488.4 488.4" xml:space="preserve">
+                        <g>
+                            <g>
+                                <path d="M0,203.25c0,112.1,91.2,203.2,203.2,203.2c51.6,0,98.8-19.4,134.7-51.2l129.5,129.5c2.4,2.4,5.5,3.6,8.7,3.6
+                                    s6.3-1.2,8.7-3.6c4.8-4.8,4.8-12.5,0-17.3l-129.6-129.5c31.8-35.9,51.2-83,51.2-134.7c0-112.1-91.2-203.2-203.2-203.2
+                                    S0,91.15,0,203.25z M381.9,203.25c0,98.5-80.2,178.7-178.7,178.7s-178.7-80.2-178.7-178.7s80.2-178.7,178.7-178.7
+                                    S381.9,104.65,381.9,203.25z"/>
+
+                            </g>
+                        </g>
+                    </svg>
+                </span>  -->
+                <div class="query-input">
+                    Output <textarea name="query" class="query"></textarea>
+                </div>
+
+                <div id="enter" tabindex="0"> Submit </div>
+                
+            </div>
+
+
             <div class="result">
                 <div class="answer-area">
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?
-                    </p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?
-                    </p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-
                 </div>
-            </div>
-            <div class="input-container">
-                    <!-- <input type="text" name="query" id="query"> -->
-                    <textarea name="query" id="query"></textarea>
-                    <span class="search-icon">
-                        <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 488.4 488.4" xml:space="preserve">
-                            <g>
-                                <g>
-                                    <path d="M0,203.25c0,112.1,91.2,203.2,203.2,203.2c51.6,0,98.8-19.4,134.7-51.2l129.5,129.5c2.4,2.4,5.5,3.6,8.7,3.6
-                                        s6.3-1.2,8.7-3.6c4.8-4.8,4.8-12.5,0-17.3l-129.6-129.5c31.8-35.9,51.2-83,51.2-134.7c0-112.1-91.2-203.2-203.2-203.2
-                                        S0,91.15,0,203.25z M381.9,203.25c0,98.5-80.2,178.7-178.7,178.7s-178.7-80.2-178.7-178.7s80.2-178.7,178.7-178.7
-                                        S381.9,104.65,381.9,203.25z"/>
- 
-                                </g>
-                            </g>
-                        </svg>
-                    </span> 
             </div>
         </div>
 
