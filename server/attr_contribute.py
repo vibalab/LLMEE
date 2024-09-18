@@ -168,8 +168,8 @@ def compute_attributions(model, tokenizer, eval_prompt, explanation_method, targ
     attr_res = llm_attr.attribute(inp, target = target[0])
     
     # 모델마다 token이 달라서 다른 방법을 찾아야 할 듯
-    # attr_res.input_tokens = list(map(lambda x: x.replace("Ġ", ""), attr_res.input_tokens)) 
-    # attr_res.output_tokens = list(map(lambda x: x.replace("Ġ", ""), attr_res.output_tokens))
+    attr_res.input_tokens = list(map(lambda x: x.replace("Ġ", ""), attr_res.input_tokens)) 
+    attr_res.output_tokens = list(map(lambda x: x.replace("Ġ", ""), attr_res.output_tokens))
     
     return attr_res
 

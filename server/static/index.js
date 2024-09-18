@@ -258,7 +258,7 @@ textareas.each(function() {
     })
 
 
-
+    //ToDo(YSKim): print model info
     $('#enter').on('click', function(e){
         e.preventDefault();
 
@@ -270,44 +270,93 @@ textareas.each(function() {
         formData.append('model_list', JSON.stringify(model_list));
 
         $('.answer-area').html("")
+        $('.answer-area').append(`Predicted Output: ${$('.query')[1].value}`);
 
-        model_list.forEach(function(model){
-            const card = $('<div>', {
-                class : `model-card ${model}`
-            });
-
-            const cardHeader = $('<div>', {
-                text: model,
-                class : `card-header ${model}`
-            });
-
-            const cardBody = $('<div>', {
-                class : `card-body ${model}`
-            });
-
-            cardBody.html( `<h1>H1 - 1 </h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum unde et quasi doloremque nam rem officia quos inventore impedit. Similique quaerat error odit eos nostrum perspiciatis minus, dignissimos repellat consequuntur?</p>
-                <h1>H1 - 2</h1>`)
-
-            card.append(cardHeader);
-            card.append(cardBody);
-
-
-            $('.answer-area').append(card);
-        })
-
-        headerEvent();
-
-        console.log(formData);
-
+        // Make the POST request to '/input' and handle the response
         fetch('/input',{
             method : 'POST',
             body : formData,
         }).then((res) => res.json())
         .then((data)=>{
             console.log(data);
+
+            model_list.forEach(function(model){
+                if (data.results && data.results[model]) {
+                    const seq_attr = data.results[model]['seq_attr']; // Get the seq_attr list
+                
+                    // Split the input sentence into words
+                    const inputSentence = $('.query')[0].value;
+                    // console.log(seq_attr.length)
+                    // console.log(inputSentence.length)
+                     const card = $('<div>', {
+                        class : `model-card ${model}`
+                    });
+
+                    const cardHeader = $('<div>', {
+                        text: model,
+                        class : `card-header ${model}`
+                    });
+
+                    const cardBody = $('<div>', {
+                        class : `card-body ${model}`
+                    });
+
+                    cardBody.html(`
+                        <p>Input     Text: ${inputSentence} </p>
+                        <p>Generated Text: ${data.results[model]['generated_text']}</p>
+                        <p>ROGUE    Score: 0.xxx</p> 
+                        <p>???      Score: 0.xxx</p>
+                        `);
+
+
+
+                    const metaData = data.results[model]['model_card'];
+                    const content = $('<table>', {
+                        class:`card-meta ${model}`
+                    });
+                    let row;
+            
+                    Object.entries(metaData).forEach(([key, value], index) => {
+                        // replace null to 'N/A'
+                        if (value === null || (Array.isArray(value) && value.length === 0)) {
+                            value = 'N/A';
+                        } else if (Array.isArray(value)) {
+                            value = value.join(', ');
+                        }
+            
+                        key = key.replace(/_/g, ' ').toLowerCase(); // replace '_' to ' '
+                        key = key.charAt(0).toUpperCase() + key.slice(1);  //make first char uppercase
+                        let cell = `<td>${key}: ${value}</td>`;
+            
+                        if (index % 2 === 0) {  
+                            row = $('<tr>');
+                            content.append(row);
+                        }
+                        row.append(cell);  
+                    });
+            
+                    cardBody.append(content);  
+                    // let colorCodedSentence = '';
+
+                    // // Loop through each word and corresponding seq_attr value
+                    // inputWords.forEach((word, index) => {
+                    //     let attrValue = seq_attr[index];
+                    //     let color = getColorFromSeqAttr(attrValue); // Function to determine color based on the seq_attr value
+                    //     colorCodedSentence += `<span style="color: ${color}">${word}</span> `;
+                    // });
+                    
+                    // cardBody.html(`<p>${colorCodedSentence}</p>`);
+
+                    card.append(cardHeader);
+                    card.append(cardBody);
+
+
+                    $('.answer-area').append(card);
+                }
+            })
+            headerEvent();
+
+            console.log(formData);
         })
     })
 
@@ -331,4 +380,16 @@ textareas.each(function() {
         })
     }
 
+    // // Function to get the color based on seq_attr value
+    // function getColorFromSeqAttr(value) {
+    //     if (value > 0) {
+    //         // Map positive values to blue scale (e.g., light blue to dark blue)
+    //         let blueIntensity = Math.min(255, Math.floor(255 * value)); // Scale the value for color intensity
+    //         return `rgb(0, 0, ${blueIntensity})`;
+    //     } else {
+    //         // Map negative values to red scale (e.g., light red to dark red)
+    //         let redIntensity = Math.min(255, Math.floor(255 * Math.abs(value))); // Scale the value for color intensity
+    //         return `rgb(${redIntensity}, 0, 0)`;
+    //     }
+    // }
 }

@@ -357,3 +357,16 @@ input:focus{
     gap : 20px;
 }
 
+
+.card-meta {
+    width: 100%; /* Table takes full width of card-body */
+    border-collapse: collapse;
+    text-align: center;
+}
+td {
+    padding: 8px; /* Padding for table cells */
+    border-bottom: 1px solid #ddd; /* Light horizontal line between rows */
+}
+tr:last-child td {
+    border-bottom: none;
+}

@@ -117,6 +117,8 @@ def inputs():
             model_dict['token_attr'] = model_dict['token_attr'].tolist(),  # token_attr가 없을 경우 None 반환
         model_dict["seq_attr"] = attribute.seq_attr.tolist()          
             
+        model_dict["input_tokens"] = attribute.input_tokens
+        model_dict["output_tokens"] = attribute.output_tokens
         # #If user doesn't select XAI method 
         # except Exception as e:
         #     return jsonify({"status": "error", "message": f"Failed to generate text for model {model_name}: {str(e)}"}), 500
