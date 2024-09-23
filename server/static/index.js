@@ -270,7 +270,7 @@ textareas.each(function() {
         formData.append('model_list', JSON.stringify(model_list));
 
         $('.answer-area').html("")
-        $('.answer-area').append(`Predicted Output: ${$('.query')[1].value}`);
+        $('.answer-area').append(`Predicted Output: <span class='predicted'>${$('.query')[1].value}</span>`);
 
         // Make the POST request to '/input' and handle the response
         fetch('/input',{
@@ -286,33 +286,34 @@ textareas.each(function() {
                 
                     // Split the input sentence into words
                     const inputSentence = $('.query')[0].value;
-                    // console.log(seq_attr.length)
-                    // console.log(inputSentence.length)
-                     const card = $('<div>', {
-                        class : `model-card ${model}`
+                    const modelName = model.split('/')[1]
+                    const card = $('<div>', {
+                        class : `model-card ${modelName}`
                     });
 
                     const cardHeader = $('<div>', {
-                        text: model,
-                        class : `card-header ${model}`
+                        text: modelName,
+                        class : `card-header ${modelName}`
                     });
 
                     const cardBody = $('<div>', {
-                        class : `card-body ${model}`
+                        class : `card-body ${modelName}`
                     });
 
                     cardBody.html(`
-                        <p>Input     Text: ${inputSentence} </p>
+                        <p>Input Text: <span class=input-seq>${inputSentence}</span></p>
                         <p>Generated Text: ${data.results[model]['generated_text']}</p>
-                        <p>ROGUE    Score: 0.xxx</p> 
-                        <p>???      Score: 0.xxx</p>
+                        <p>
+                            ROUGE-1 Score: ${data.results[model]['rouge_score']['rouge1'][2].toFixed(3)}
+                            ROUGE-2 Score: ${data.results[model]['rouge_score']['rouge2'][2].toFixed(3)}
+                            ROUGE-L Score: ${data.results[model]['rouge_score']['rougeL'][2].toFixed(3)}
+                            BLEURT Score: ${data.results[model]['bleurt_score'].toFixed(3)}
+                        </p>
                         `);
-
-
 
                     const metaData = data.results[model]['model_card'];
                     const content = $('<table>', {
-                        class:`card-meta ${model}`
+                        class:`card-meta ${modelName}`
                     });
                     let row;
             
@@ -336,22 +337,13 @@ textareas.each(function() {
                     });
             
                     cardBody.append(content);  
-                    // let colorCodedSentence = '';
-
-                    // // Loop through each word and corresponding seq_attr value
-                    // inputWords.forEach((word, index) => {
-                    //     let attrValue = seq_attr[index];
-                    //     let color = getColorFromSeqAttr(attrValue); // Function to determine color based on the seq_attr value
-                    //     colorCodedSentence += `<span style="color: ${color}">${word}</span> `;
-                    // });
-                    
-                    // cardBody.html(`<p>${colorCodedSentence}</p>`);
 
                     card.append(cardHeader);
                     card.append(cardBody);
 
 
                     $('.answer-area').append(card);
+                    seqAttrColoring(data.results[model], modelName);
                 }
             })
             headerEvent();
@@ -380,16 +372,54 @@ textareas.each(function() {
         })
     }
 
+    //Function get data and model name
+    function seqAttrColoring(model, modelName){  
+        const input_tokens = model.input_tokens_origin;
+        const seq_attr = model.seq_attr;
+        console.log(modelName)
+        console.log(modelName.split('/'))
+
+        const spanElements = $(`.card-body.${modelName} span.input-seq`);
+        let currentIndex = 0; // position in the input_seq
+
+        input_tokens.forEach((token, tokenIndex) => {
+            // 토큰이 input_seq에서 어느 위치에 있는지 검색
+            const tokenPosition = input_seq.indexOf(token, currentIndex);
+    
+            // 토큰을 찾았다면
+            if (tokenPosition !== -1) {
+                // 해당 토큰의 확률값 가져옴
+                const score = seq_attr[tokenIndex];
+    
+                // 색상 매핑
+                const color = mapAttrColor(score);
+    
+                // 해당 토큰을 포함하는 span을 찾아 배경색을 설정
+                spanElements.each(function() {
+                    const spanText = $(this).text().trim();
+                    if (spanText.includes(token)) {
+                        $(this).css('background-color', color);
+                    }
+                });
+    
+                // 현재 위치를 토큰 이후로 업데이트
+                currentIndex = tokenPosition + token.length;
+            }
+        });
+    }
+
     // // Function to get the color based on seq_attr value
-    // function getColorFromSeqAttr(value) {
-    //     if (value > 0) {
-    //         // Map positive values to blue scale (e.g., light blue to dark blue)
-    //         let blueIntensity = Math.min(255, Math.floor(255 * value)); // Scale the value for color intensity
-    //         return `rgb(0, 0, ${blueIntensity})`;
-    //     } else {
-    //         // Map negative values to red scale (e.g., light red to dark red)
-    //         let redIntensity = Math.min(255, Math.floor(255 * Math.abs(value))); // Scale the value for color intensity
-    //         return `rgb(${redIntensity}, 0, 0)`;
-    //     }
-    // }
+    function mapAttrColor(value) {
+        let color;
+        if (value < 0) {
+            // 음수값은 빨간색 (밝기는 value에 비례)
+            const redIntensity = Math.min(255, Math.floor(255 * Math.abs(value)));
+            color = `rgb(${redIntensity}, 0, 0)`;
+        } else {
+            // 양수값은 파란색 (밝기는 value에 비례)
+            const blueIntensity = Math.min(255, Math.floor(255 * value));
+            color = `rgb(0, 0, ${blueIntensity})`;
+        }
+        return color;
+    }
 }
