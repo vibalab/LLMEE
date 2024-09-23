@@ -265,9 +265,10 @@ def update_dict(model_dict, tokenizer):
 
     # seq_attr에서 해당 인덱스를 제거 (1차원 배열이므로 해당 인덱스에서 값 삭제)
     model_dict['seq_attr'] = [attr for i, attr in enumerate(model_dict['seq_attr']) if i not in indices_to_remove]
-
+    
     # token_attr에서 해당 인덱스를 제거 (2차원 배열이므로 각 열에서 해당 인덱스 삭제)
-    model_dict['token_attr'] = [[attr for i, attr in enumerate(row) if i not in indices_to_remove] for row in model_dict['token_attr']]
+    if model_dict['token_attr'] != None:
+        model_dict['token_attr'] = [[attr for i, attr in enumerate(row) if i not in indices_to_remove] for row in model_dict['token_attr']]
 
     return model_dict
 
