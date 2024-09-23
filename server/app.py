@@ -135,4 +135,4 @@ def inputs():
     return jsonify({"status": "success", "results": results})
 
 if __name__ == '__main__':
-    app.run(port='5011', debug=True)
+    app.run(port='5001', debug=True)
