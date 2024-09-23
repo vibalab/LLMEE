@@ -194,17 +194,17 @@ def generate_text_prob(model, tokenizer, eval_prompt, target):
         sentence = sentences[0]
 
     # BLEU    
-    score = bleu.sentence_bleu(list(map(lambda ref: ref.split(), [gen_text])),target[0].split())
+    # score = bleu.sentence_bleu(list(map(lambda ref: ref.split(), [gen_text])),target[0].split())
     
-    # # ROUGE
-    # scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
-    # score = scorer.score(gen_text, target[0])
+    # ROUGE
+    scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+    rouge_score = scorer.score(gen_text, target[0])
     
-    # # BLEURT: 사전 학습된 언어 모델을 기반으로 하여 인간의 평가 점수를 모방
-    # metric = evaluate.load("bleurt", trust_remote_code=True)
-    # score = metric.compute(predictions=target, references=[gen_text])['scores'][0]
+    # BLEURT: 사전 학습된 언어 모델을 기반으로 하여 인간의 평가 점수를 모방
+    metric = evaluate.load("bleurt", trust_remote_code=True)
+    bleurt_score = metric.compute(predictions=target, references=[gen_text])['scores'][0]
     
-    return sentence, score
+    return sentence, rouge_score, bleurt_score
 
 def get_model_info(model_name):
     base_url = "https://huggingface.co"
@@ -246,3 +246,43 @@ def get_model_card(model_name, model):
     model_card['vocab_size'] = getattr(config, 'vocab_size', None)
 
     return model_card
+
+def update_dict(model_dict, tokenizer):
+    # Special tokens 리스트 가져오기
+    special_tokens = tokenizer.all_special_tokens
+
+    input_tokens = model_dict["input_tokens"]
+
+    # Special token이 있는 인덱스 추적
+    indices_to_remove = [i for i, token in enumerate(input_tokens) if token in special_tokens]
+
+    # Special tokens 제거한 토큰 리스트 생성
+    cleaned_tokens = [token for token in input_tokens if token not in special_tokens]
+
+    model_dict["input_tokens"] = remove_special_prefixes(cleaned_tokens)
+
+    model_dict["output_tokens"] = remove_special_prefixes(model_dict["output_tokens"])
+
+    # seq_attr에서 해당 인덱스를 제거 (1차원 배열이므로 해당 인덱스에서 값 삭제)
+    model_dict['seq_attr'] = [attr for i, attr in enumerate(model_dict['seq_attr']) if i not in indices_to_remove]
+
+    # token_attr에서 해당 인덱스를 제거 (2차원 배열이므로 각 열에서 해당 인덱스 삭제)
+    model_dict['token_attr'] = [[attr for i, attr in enumerate(row) if i not in indices_to_remove] for row in model_dict['token_attr']]
+
+    return model_dict
+
+
+def remove_special_prefixes(tokens):
+    # 제거할 특수 문자 리스트
+    special_prefixes = ['##', 'Ġ', '▁', '_']
+    
+    # 특수 문자 제거한 토큰들
+    processed_tokens = []
+    for token in tokens:
+        for prefix in special_prefixes:
+            if token.startswith(prefix):
+                token = token[len(prefix):]
+                break  # 한 번 특수 문자를 제거했으면 다음으로 넘어감
+        processed_tokens.append(token)
+    return processed_tokens
+

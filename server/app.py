@@ -7,12 +7,11 @@ from flask_cors import CORS
 from transformers import AutoModelForImageClassification
 import torch
 import numpy as np
-from attr_contribute import get_model_card, create_bnb_config, load_model, compute_attributions, generate_text_prob
+from attr_contribute import get_model_card, create_bnb_config, load_model, compute_attributions, generate_text_prob, update_dict
 import json
 import gc
 import huggingface_hub
-
-
+import socket
 
 app = Flask(__name__)
 CORS(app)
@@ -24,7 +23,6 @@ loaded_models = []
 language_model = None
 tokenizer = None
 
-
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -32,6 +30,7 @@ def home():
 def _unload_model():
     global language_model, tokenizer
     if language_model is not None:
+        # language_model.to('cpu')
         del language_model
         torch.cuda.empty_cache()  # GPU 메모리 캐시 해제
         gc.collect()
@@ -92,12 +91,7 @@ def inputs():
     output_prompt = request.form.get('output')
     xai_method = request.form.get('xai-method').replace(" ", "")
     model_list = json.loads(request.form.get('model_list'))
-    
-    # print(input_prompt)
-    # print(output_prompt)
-    # print(xai_method)
-    # print(model_list)
-    
+
     results = {}
 
     # Create the configuration for the model
@@ -116,9 +110,11 @@ def inputs():
         if model_dict['token_attr'] != None:
             model_dict['token_attr'] = model_dict['token_attr'].tolist(),  # token_attr가 없을 경우 None 반환
         model_dict["seq_attr"] = attribute.seq_attr.tolist()          
-            
-        model_dict["input_tokens"] = attribute.input_tokens
+
+        model_dict["input_tokens"] = attribute.input_tokens    
         model_dict["output_tokens"] = attribute.output_tokens
+
+        model_dict = update_dict(model_dict, tokenizer)
         # #If user doesn't select XAI method 
         # except Exception as e:
         #     return jsonify({"status": "error", "message": f"Failed to generate text for model {model_name}: {str(e)}"}), 500
@@ -127,55 +123,16 @@ def inputs():
         if not _is_valid_explanation_method(xai_method):
             return jsonify({"status": "error", "message": "Invalid explanation method."}), 400
 
-        model_dict["generated_text"], model_dict["score"] = generate_text_prob(language_model, tokenizer, input_prompt, output_prompt)
-        model_dict['model_card'] = get_model_card(model_name, language_model)
+        model_dict["generated_text"], model_dict["rouge_score"], model_dict["bleurt_score"] = generate_text_prob(language_model, tokenizer, input_prompt, output_prompt)
+        model_dict["model_card"] = get_model_card(model_name, language_model)
         
         results[model_name] = model_dict
 
         _unload_model()
-        
+    
+    _unload_model()
 
     return jsonify({"status": "success", "results": results})
 
-"""     
-@app.route('/attribute', methods=['POST'])
-def attribute():
-    # Receive data from client
-    model_name = request.form.get('model_name')
-    input_prompt = request.form.get('input_prompt')             
-    target_text = request.form.get('target_text')               # If target_text is None, we generate target text automatically.
-    explanation_method = request.form.get('explanation_method') # FeatureAblation, ShapleyValues, ShapleyValueSampling, Lime, KernelShap
-    
-    
-    # Check if explanation_method is valid
-    if not _is_valid_explanation_method(explanation_method):
-        return jsonify({"status": "error", "message": "Invalid explanation method."}), 400
-    
-    # Create the configuration for the model
-    bnb_config = create_bnb_config()
-    
-    try:
-        #Load model
-        model, tokenizer = load_model(model_name, bnb_config)
-
-    except ValueError as e:
-        #Invalid model_name
-        return jsonify({"status": "error", "message": f"ValueError: {str(e)}"}), 400
-    
-    except Exception as e:
-        #Other errors
-        return jsonify({"status": "error", "message": f"An unexpected error occurred: {str(e)}"}), 500
-    
-    result = compute_attributions(model, tokenizer, input_prompt, explanation_method, target_text)
-
-    return jsonify({
-        "input_text": result.input_tokens,
-        "output_tokens": result.output_tokens,
-        "token_attr": getattr(result, 'token_attr', None),  # token_attr가 없을 경우 None 반환
-        "seq_attr": result.seq_attr
-    })
- """    
-    
 if __name__ == '__main__':
-    app.run(port='5003', debug=True)
-    
+    app.run(port='5011', debug=True)
