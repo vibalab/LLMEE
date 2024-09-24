@@ -270,7 +270,7 @@ textareas.each(function() {
         formData.append('model_list', JSON.stringify(model_list));
 
         $('.answer-area').html("")
-        $('.answer-area').append(`Predicted Output: <span class='predicted'>${$('.query')[1].value}</span>`);
+        $('.answer-area').append(`<p>Predicted Output: <span class='predicted'>${$('.query')[1].value}</span></p>`);
 
         // Make the POST request to '/input' and handle the response
         fetch('/input',{
@@ -347,7 +347,7 @@ textareas.each(function() {
                 }
             })
             headerEvent();
-
+            setupWordClickHandler(data, model_list)
             console.log(formData);
         })
     })
@@ -372,54 +372,200 @@ textareas.each(function() {
         })
     }
 
-    //Function get data and model name
-    function seqAttrColoring(model, modelName){  
-        const input_tokens = model.input_tokens_origin;
-        const seq_attr = model.seq_attr;
-        console.log(modelName)
-        console.log(modelName.split('/'))
+    // 1. 단어 클릭 핸들러 설정 함수
+    function setupWordClickHandler(data, model_list) {
+        // 문장 선택
+        const sentenceSpan = $('body > div.container > div.main.item > div.result > div > p > span');
+        const sentenceText = sentenceSpan.text();
 
-        const spanElements = $(`.card-body.${modelName} span.input-seq`);
-        let currentIndex = 0; // position in the input_seq
+        // 2. 문장을 단어로 분할하고 클릭 가능하게 설정
+        const wordsWithSpaces = sentenceText.match(/\S+\s*/g) || [];
 
-        input_tokens.forEach((token, tokenIndex) => {
-            // 토큰이 input_seq에서 어느 위치에 있는지 검색
-            const tokenPosition = input_seq.indexOf(token, currentIndex);
-    
-            // 토큰을 찾았다면
-            if (tokenPosition !== -1) {
-                // 해당 토큰의 확률값 가져옴
-                const score = seq_attr[tokenIndex];
-    
-                // 색상 매핑
-                const color = mapAttrColor(score);
-    
-                // 해당 토큰을 포함하는 span을 찾아 배경색을 설정
-                spanElements.each(function() {
-                    const spanText = $(this).text().trim();
-                    if (spanText.includes(token)) {
-                        $(this).css('background-color', color);
-                    }
-                });
-    
-                // 현재 위치를 토큰 이후로 업데이트
-                currentIndex = tokenPosition + token.length;
-            }
+        let wordIndex = 0;
+        const newHTML = wordsWithSpaces.map(word => {
+            const trimmedWord = word.trim();
+            const spaceAfter = word.slice(trimmedWord.length);
+            const html = `<span class="word" data-index="${wordIndex}">${trimmedWord}</span>${spaceAfter}`;
+            wordIndex++;
+            return html;
+        }).join('');
+
+        // 기존 문장을 새로운 HTML로 대체
+        sentenceSpan.html(newHTML);
+        $('span.word').css('cursor', 'pointer');
+
+        // 각 모델의 문장도 단어별로 감싸기
+        wrapTokensForModels(data, model_list);
+
+        // 3. 단어 클릭 이벤트 설정
+        $('span.word').off('click').on('click', function() {
+            const index = parseInt($(this).attr('data-index'));
+
+            $('span.word').css('background-color', ''); // 이전에 적용된 스타일 초기화
+            $(this).css('background-color', '#f0f0f0'); // 옅은 회색 음영
+
+            // 4. 모델 리스트 순회
+            model_list.forEach(function(modelName) {
+                const modelData = data.results[modelName];
+                const tokenAttr = modelData['token_attr'][0];
+                // 4. token_attr 존재 여부 확인
+                if (!tokenAttr) {
+                    // 다음 모델로 넘어감
+                    return;
+                }
+
+                // 5. token_attr를 사용하여 배경색 적용
+                performBackgroundColoring(modelName, tokenAttr[index], index);
+            });
         });
     }
 
-    // // Function to get the color based on seq_attr value
-    function mapAttrColor(value) {
+    function wrapTokensInSpans(model, modelName) {
+        const spanElements = $(`.card-body[class*='${modelName}'] span.input-seq`);
+        const input_seq = spanElements[0].innerText;
+        const input_tokens = model.input_tokens;
+    
+        // 토큰을 감싸는 새로운 HTML을 생성
+        let tokenizedHTML = '';
+        let currentIndex = 0;
+    
+        input_tokens.forEach((token) => {
+            // 특수 문자를 이스케이프하여 정규식을 안전하게 만듭니다.
+            const escapedToken = token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    
+            // 현재 인덱스부터 토큰의 위치를 찾습니다.
+            const tokenPosition = input_seq.indexOf(token, currentIndex);
+    
+            if (tokenPosition !== -1) {
+                // 토큰 이전의 텍스트를 추가 (공백이나 구두점 등)
+                if (tokenPosition > currentIndex) {
+                    const beforeToken = input_seq.substring(currentIndex, tokenPosition);
+                    tokenizedHTML += beforeToken; // 토큰 이전의 텍스트는 감싸지 않음
+                }
+    
+                // 토큰을 `<span>`으로 감쌉니다.
+                tokenizedHTML += `<span class="token">${token}</span>`;
+    
+                // 현재 인덱스를 업데이트
+                currentIndex = tokenPosition + token.length;
+            }
+        });
+    
+        // 마지막 토큰 이후의 남은 텍스트를 추가
+        if (currentIndex < input_seq.length) {
+            const remainingText = input_seq.substring(currentIndex);
+            tokenizedHTML += remainingText;
+        }
+    
+        // 기존의 내용물을 새로운 HTML로 교체
+        spanElements[0].innerHTML = tokenizedHTML;
+    }
+
+    // 2. 각 모델의 문장에 단어별로 span 감싸기
+    function wrapTokensForModels(data, model_list) {
+        model_list.forEach(function(modelName) {
+            const sentenceSpan = $(`.card-body[class*='${modelName}'] span.input-seq`);
+            const sentenceText = sentenceSpan.text();
+
+            const wordsWithSpaces = sentenceText.match(/\S+\s*/g) || [];
+
+            let wordIndex = 0;
+            const newHTML = wordsWithSpaces.map(word => {
+                const trimmedWord = word.trim();
+                const spaceAfter = word.slice(trimmedWord.length);
+                const html = `<span class="token" data-index="${wordIndex}">${trimmedWord}</span>${spaceAfter}`;
+                wordIndex++;
+                return html;
+            }).join('');
+
+            sentenceSpan.html(newHTML);
+        });
+    }
+
+    // 3. 배경색 적용 함수
+    function performBackgroundColoring(modelName, tokenAttr) {
+        const modelName_split = modelName.split('/')[1]
+        console.log('run function')
+        console.log(tokenAttr)
+        const sentenceSpan = $(`.card-body[class*='${modelName_split}'] span.input-seq`);
+        const tokenSpans = sentenceSpan.find('span.token');
+        console.log(tokenSpans)
+
+        // seq_attr와 동일하게 min, max 값 계산
+        const minAttr = Math.min(...tokenAttr);
+        const maxAttr = Math.max(...tokenAttr);
+
+        // 각 토큰에 배경색 적용
+        tokenSpans.each(function(index) {
+            const value = tokenAttr[index];
+            const color = mapAttrColor(value, minAttr, maxAttr);
+            $(this).css('background-color', color);
+        });
+    }
+
+
+    function seqAttrColoring(model, modelName){  
+        const input_tokens = model.input_tokens;
+        const seq_attr = model.seq_attr;
+    
+        // 먼저 각 토큰을 `<span>`으로 감쌉니다.
+        wrapTokensInSpans(model, modelName);
+    
+        // 토큰별로 감싸진 `<span>` 요소들을 선택합니다.
+        const tokenSpans = $(`.card-body[class*='${modelName}'] span.input-seq span.token`);
+    
+        // `seq_attr`의 최소값과 최대값을 계산
+        const minAttr = Math.min(...seq_attr);
+        const maxAttr = Math.max(...seq_attr);
+    
+        // 각 토큰에 배경색을 적용
+        tokenSpans.each(function(index) {
+            const token = $(this).text();
+            const score = seq_attr[index];
+    
+            const color = mapAttrColor(score, minAttr, maxAttr);
+    
+            $(this).css('background-color', color);
+        });
+    }
+    
+    // Function to get the color based on seq_attr value
+    function mapAttrColor(value, minAttr, maxAttr) {
         let color;
+        let alpha;
+
         if (value < 0) {
-            // 음수값은 빨간색 (밝기는 value에 비례)
-            const redIntensity = Math.min(255, Math.floor(255 * Math.abs(value)));
-            color = `rgb(${redIntensity}, 0, 0)`;
+            // 음수 값 매핑: #1E88E5
+            const normalized = (value - 0) / (minAttr - 0);
+            alpha = normalized;
+            color = hexToRgba('#1E88E5', alpha);
+        } else if (value > 0) {
+            // 양수 값 매핑: #FF0D57
+            const normalized = value / maxAttr;
+            alpha = normalized;
+            color = hexToRgba('#FF0D57', alpha);
         } else {
-            // 양수값은 파란색 (밝기는 value에 비례)
-            const blueIntensity = Math.min(255, Math.floor(255 * value));
-            color = `rgb(0, 0, ${blueIntensity})`;
+            // 값이 0인 경우
+            alpha = 0;
+            color = 'rgba(0, 0, 0, 0)';
         }
         return color;
+    }
+
+    // Helper function to convert hex color code to RGBA with alpha
+    function hexToRgba(hex, alpha) {
+        hex = hex.replace('#', '');
+
+        if (hex.length === 3) {
+            hex = hex.split('').map(function (hexChar) {
+                return hexChar + hexChar;
+            }).join('');
+        }
+
+        var r = parseInt(hex.substring(0,2), 16);
+        var g = parseInt(hex.substring(2,4), 16);
+        var b = parseInt(hex.substring(4,6), 16);
+
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 }
