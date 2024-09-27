@@ -1,3 +1,4 @@
+import numpy as np
 
 # PyTorch 및 모델 관련 라이브러리
 import torch
@@ -253,6 +254,8 @@ def update_dict(model_dict, tokenizer):
 
     input_tokens = model_dict["input_tokens"]
 
+    model_dict['input_tokens_origin'] = input_tokens
+
     # Special token이 있는 인덱스 추적
     indices_to_remove = [i for i, token in enumerate(input_tokens) if token in special_tokens]
 
@@ -263,12 +266,13 @@ def update_dict(model_dict, tokenizer):
 
     model_dict["output_tokens"] = remove_special_prefixes(model_dict["output_tokens"])
 
-    # seq_attr에서 해당 인덱스를 제거 (1차원 배열이므로 해당 인덱스에서 값 삭제)
     model_dict['seq_attr'] = [attr for i, attr in enumerate(model_dict['seq_attr']) if i not in indices_to_remove]
     
-    # token_attr에서 해당 인덱스를 제거 (2차원 배열이므로 각 열에서 해당 인덱스 삭제)
-    if model_dict['token_attr'] != None:
-        model_dict['token_attr'] = [[attr for i, attr in enumerate(row) if i not in indices_to_remove] for row in model_dict['token_attr']]
+    if model_dict['token_attr'] is not None:
+        model_dict['token_attr'] = [
+            [attr for i, attr in enumerate(row) if i not in indices_to_remove] 
+            for row in model_dict['token_attr'].tolist()
+        ]
 
     return model_dict
 
