@@ -13,6 +13,11 @@ import gc
 import huggingface_hub
 import socket
 
+import warnings
+
+# 특정 경고 무시
+warnings.filterwarnings("ignore")
+
 app = Flask(__name__)
 CORS(app)
 
@@ -107,14 +112,14 @@ def inputs():
         model_dict = {}
                 
         model_dict["token_attr"] = getattr(attribute, 'token_attr', None)
-        if model_dict['token_attr'] != None:
-            model_dict['token_attr'] = model_dict['token_attr'].tolist(),  # token_attr가 없을 경우 None 반환
-        model_dict["seq_attr"] = attribute.seq_attr.tolist()          
 
+        model_dict["seq_attr"] = attribute.seq_attr.tolist()
+        
         model_dict["input_tokens"] = attribute.input_tokens    
         model_dict["output_tokens"] = attribute.output_tokens
 
         model_dict = update_dict(model_dict, tokenizer)
+
         # #If user doesn't select XAI method 
         # except Exception as e:
         #     return jsonify({"status": "error", "message": f"Failed to generate text for model {model_name}: {str(e)}"}), 500
@@ -135,4 +140,4 @@ def inputs():
     return jsonify({"status": "success", "results": results})
 
 if __name__ == '__main__':
-    app.run(port='5001', debug=True)
+    app.run(port='5003', debug=True)
