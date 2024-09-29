@@ -353,9 +353,9 @@ textareas.each(function() {
 
     function headerEvent(){
         $('.card-header').on('click', function(e){
-            const isShirinked = $(this).parent().css('max-height') == "100px";
+            const isShirinked = $(this).parent().css('max-height') == "105px";
     
-            // console.log(isShirinked);
+            console.log(isShirinked);
             
             if(isShirinked){
                 // $(this).parent().css('flex-basis', "");
@@ -364,7 +364,7 @@ textareas.each(function() {
                 // $(this).next().css('height', "auto");
             } else{
                 // $(this).parent().css('flex-basis', "100px");
-                $(this).parent().css('max-height', "100px");
+                $(this).parent().css('max-height', "105px");
                 // $(this).next().css('overflow-y', "hidden");
                 // $(this).next().css('height', "100px");
             }        
@@ -402,6 +402,9 @@ textareas.each(function() {
 
             $('span.word').css('background-color', ''); // 이전에 적용된 스타일 초기화
             $(this).css('background-color', '#f0f0f0'); // 옅은 회색 음영
+
+            $('p.value-container').remove();
+            $('.value-row').remove();
 
             // 4. 모델 리스트 순회
             model_list.forEach(function(modelName) {
@@ -490,8 +493,6 @@ textareas.each(function() {
         const flatAttr = Array.isArray(tokenAttr[0]) ? tokenAttr.flat() : tokenAttr;
         const minAttr = Math.min(...flatAttr);
         const maxAttr = Math.max(...flatAttr);
-        $('p.value-container').remove();
-        $('.value-row').remove();
 
         const valueRow = $('<p class="value-row"></p>').css({
             'margin-top': '0px',  // 두 p 사이 간격 줄이기

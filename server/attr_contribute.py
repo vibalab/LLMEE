@@ -2,6 +2,8 @@ import numpy as np
 
 # PyTorch 및 모델 관련 라이브러리
 import torch
+import tensorflow as tf
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import transformers
 
