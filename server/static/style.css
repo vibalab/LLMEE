@@ -370,3 +370,18 @@ td {
 tr:last-child td {
     border-bottom: none;
 }
+
+
+.generated-text {
+    margin-top: 10px;
+    font-weight: bold;
+}
+.scores {
+    margin-top: 5px;
+    font-size: 0.9em; /* 스코어 폰트 크기를 조정 */
+    color: #555; /* 스코어 색상을 조정 */
+}
+.scores span {
+    display: block; /* 스코어를 세로로 배치 */
+    margin-bottom: 2px;
+}

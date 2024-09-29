@@ -302,13 +302,13 @@ textareas.each(function() {
 
                     cardBody.html(`
                         <p>Input Text: <span class=input-seq>${inputSentence}</span></p>
-                        <p>Generated Text: ${data.results[model]['generated_text']}</p>
-                        <p>
-                            ROUGE-1 Score: ${data.results[model]['rouge_score']['rouge1'][2].toFixed(3)}
-                            ROUGE-2 Score: ${data.results[model]['rouge_score']['rouge2'][2].toFixed(3)}
-                            ROUGE-L Score: ${data.results[model]['rouge_score']['rougeL'][2].toFixed(3)}
-                            BLEURT Score: ${data.results[model]['bleurt_score'].toFixed(3)}
-                        </p>
+                        <p class=generated-text>Generated Text: ${data.results[model]['generated_text']}</p>
+                        <div class=scores>
+                            <span>ROUGE-1 Score: ${data.results[model]['rouge_score']['rouge1'][2].toFixed(3)}</span>
+                            <span>ROUGE-2 Score: ${data.results[model]['rouge_score']['rouge2'][2].toFixed(3)}</span>
+                            <span>ROUGE-L Score: ${data.results[model]['rouge_score']['rougeL'][2].toFixed(3)}</span>
+                            <span>BLEURT Score: ${data.results[model]['bleurt_score'].toFixed(3)}</span>
+                        </div>
                         `);
 
                     const metaData = data.results[model]['model_card'];
@@ -348,7 +348,6 @@ textareas.each(function() {
             })
             headerEvent();
             setupWordClickHandler(data, model_list)
-            console.log(formData);
         })
     })
 
@@ -356,7 +355,7 @@ textareas.each(function() {
         $('.card-header').on('click', function(e){
             const isShirinked = $(this).parent().css('max-height') == "100px";
     
-            console.log(isShirinked);
+            // console.log(isShirinked);
             
             if(isShirinked){
                 // $(this).parent().css('flex-basis', "");
@@ -407,15 +406,14 @@ textareas.each(function() {
             // 4. 모델 리스트 순회
             model_list.forEach(function(modelName) {
                 const modelData = data.results[modelName];
-                const tokenAttr = modelData['token_attr'][0];
+                const tokenAttr = modelData['token_attr'];
                 // 4. token_attr 존재 여부 확인
                 if (!tokenAttr) {
                     // 다음 모델로 넘어감
                     return;
                 }
-
                 // 5. token_attr를 사용하여 배경색 적용
-                performBackgroundColoring(modelName, tokenAttr[index], index);
+                performBackgroundColoring(modelName, tokenAttr[index], index, modelData['input_tokens']);
             });
         });
     }
@@ -483,26 +481,44 @@ textareas.each(function() {
     }
 
     // 3. 배경색 적용 함수
-    function performBackgroundColoring(modelName, tokenAttr) {
+    function performBackgroundColoring(modelName, tokenAttr, selected_index, input_tokens) {
         const modelName_split = modelName.split('/')[1]
-        console.log('run function')
-        console.log(tokenAttr)
         const sentenceSpan = $(`.card-body[class*='${modelName_split}'] span.input-seq`);
         const tokenSpans = sentenceSpan.find('span.token');
-        console.log(tokenSpans)
 
         // seq_attr와 동일하게 min, max 값 계산
-        const minAttr = Math.min(...tokenAttr);
-        const maxAttr = Math.max(...tokenAttr);
+        const flatAttr = Array.isArray(tokenAttr[0]) ? tokenAttr.flat() : tokenAttr;
+        const minAttr = Math.min(...flatAttr);
+        const maxAttr = Math.max(...flatAttr);
+        $('p.value-container').remove();
+        $('.value-row').remove();
 
+        const valueRow = $('<p class="value-row"></p>').css({
+            'margin-top': '0px',  // 두 p 사이 간격 줄이기
+            'margin-bottom': '0px',  // 두 p 사이 간격 줄이기
+            'padding-left': '130px',  // 'Input Text'의 영향으로 좌우 맞춤
+            'font-size': '0.8em'
+        });
         // 각 토큰에 배경색 적용
         tokenSpans.each(function(index) {
-            const value = tokenAttr[index];
-            const color = mapAttrColor(value, minAttr, maxAttr);
-            $(this).css('background-color', color);
-        });
-    }
+            const value = Array.isArray(tokenAttr[index]) ? tokenAttr[index][0] : tokenAttr[index];
+            if(input_tokens[index] != ''){
+                const color = mapAttrColor(value, minAttr, maxAttr);
+                $(this).css('background-color', color);
+                const roundedValue = value.toFixed(3);  // 소숫점 3자리로 반올림
 
+                const $valueContainer = $('<span></span>').css({
+                    'font-size': '0.8em',
+                    'color': color,
+                    'margin-right': '10px'  // 각 숫자 간 간격 추가
+                }).text(roundedValue);
+
+                valueRow.append($valueContainer);  // 숫자 추가
+            }
+        });
+        sentenceSpan.after(valueRow);
+
+    }
 
     function seqAttrColoring(model, modelName){  
         const input_tokens = model.input_tokens;
