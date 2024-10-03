@@ -372,7 +372,7 @@ tr:last-child td {
 }
 
 
-.generated-text {
+.text {
     margin-top: 10px;
     font-weight: bold;
 }
@@ -384,4 +384,57 @@ tr:last-child td {
 .scores span {
     display: block; /* 스코어를 세로로 배치 */
     margin-bottom: 2px;
+    position: relative; /* 부모 span에 대한 상대적 위치 */
+}
+
+.outputs span {
+    position: relative; /* 부모 span에 대한 상대적 위치 */
+}
+
+.top-icon{
+    position: relative; /* 부모 span에 대한 상대적 위치 */
+}
+
+.tooltip-icon {
+    cursor: pointer;
+    margin-left: 5px;
+    color: #48444b; /* 아이콘 색상 */
+    font-size: 1.2em; /* 아이콘 크기 조정 */
+}
+
+.tooltip-icon:hover::after {
+    content: attr(data-tooltip);  /* 툴팁 내용 설정 */
+    position: absolute;
+    left: 50%;  /* 툴팁이 아이콘의 중앙에 맞춰지도록 */
+    transform: translateX(-50%);  /* 수평 중앙 정렬 */
+    top: 120%;  /* 아이콘 바로 아래에 위치 */
+    background-color: #555 ;
+    color: rgb(205, 205, 205);
+    padding: 5px;
+    border-radius: 3px;
+    white-space: pre-line;  /* 줄바꿈을 위한 설정 */
+    font-size: 0.9em;
+    z-index: 100;  /* 다른 요소보다 위에 표시 */
+}
+
+.tooltip-icon-text {
+    cursor: pointer;
+    margin-left: 5px;
+    color: #48444b; /* 아이콘 색상 */
+    font-size: 1em; /* 아이콘 크기 조정 */
+}
+.tooltip-icon-text:hover::after {
+    content: attr(data-tooltip);  /* 툴팁 내용 설정 */
+    position: absolute;
+    left: 50%;  /* 툴팁이 아이콘의 중앙에 맞춰지도록 */
+    transform: translateX(-50%);  /* 수평 중앙 정렬 */
+    top: 120%;  /* 아이콘 바로 아래에 위치 */
+    background-color: #555 ;
+    color: rgb(205, 205, 205);
+    padding: 5px;
+    border-radius: 3px;
+    white-space: pre-line;  /* 줄바꿈을 위한 설정 */
+    font-size: 0.9em;
+    z-index: 100;  /* 다른 요소보다 위에 표시 */
+    min-width: 500px; /* 너비를 더 넓게 설정 */
 }

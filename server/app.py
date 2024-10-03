@@ -106,7 +106,6 @@ def inputs():
     bnb_config = create_bnb_config()
     try:
         for model_name in model_list:
-            print('11111111111111111111 loop for %s', model_name)
             # Model path
             model_dir = os.path.join("./models", model_name)
             
@@ -132,7 +131,7 @@ def inputs():
             if not _is_valid_explanation_method(xai_method):
                 return jsonify({"status": "error", "message": "Invalid explanation method."}), 400
 
-            model_dict["generated_text"], model_dict["rouge_score"], model_dict["bleurt_score"] = generate_text_prob(language_model, tokenizer, input_prompt, output_prompt)
+            model_dict["generated_text"], model_dict["rouge_score"], model_dict["bleurt_score"], model_dict["bleu_score"] = generate_text_prob(language_model, tokenizer, input_prompt, output_prompt)
             model_dict["model_card"] = get_model_card(model_name, language_model)
             
             results[model_name] = model_dict
@@ -146,4 +145,4 @@ def inputs():
     return jsonify({"status": "success", "results": results})
 
 if __name__ == '__main__':
-    app.run(port='5004', debug=True, use_reloader=False)
+    app.run(port='5003', debug=True, use_reloader=False)

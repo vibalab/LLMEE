@@ -197,7 +197,7 @@ def generate_text_prob(model, tokenizer, eval_prompt, target):
         sentence = sentences[0]
 
     # BLEU    
-    # score = bleu.sentence_bleu(list(map(lambda ref: ref.split(), [gen_text])),target[0].split())
+    bleu_score = bleu.sentence_bleu(list(map(lambda ref: ref.split(), [gen_text])),target[0].split())
     
     # ROUGE
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
@@ -207,7 +207,7 @@ def generate_text_prob(model, tokenizer, eval_prompt, target):
     metric = evaluate.load("bleurt", trust_remote_code=True)
     bleurt_score = metric.compute(predictions=target, references=[gen_text])['scores'][0]
     
-    return sentence, rouge_score, bleurt_score
+    return sentence, rouge_score, bleurt_score, bleu_score
 
 def get_model_info(model_name):
     base_url = "https://huggingface.co"

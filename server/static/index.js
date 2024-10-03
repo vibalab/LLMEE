@@ -270,7 +270,8 @@ textareas.each(function() {
         formData.append('model_list', JSON.stringify(model_list));
 
         $('.answer-area').html("")
-        $('.answer-area').append(`<p>Predicted Output: <span class='predicted'>${$('.query')[1].value}</span></p>`);
+        $('.answer-area').append(`<p><span class=select-model>Predicted Output</span> <span class='predicted'>${$('.query')[1].value}</span><i class="top-icon fas fa-question-circle tooltip-icon-text" data-tooltip="This Attribute Score measures how much the input 'word' contributed to the predicted output.
+        A positive score means the input positively influenced the output, while a negative score indicates a negative or neutral influence."></i></p>`);
 
         // Make the POST request to '/input' and handle the response
         fetch('/input',{
@@ -301,13 +302,14 @@ textareas.each(function() {
                     });
 
                     cardBody.html(`
-                        <p>Input Text: <span class=input-seq>${inputSentence}</span></p>
-                        <p class=generated-text>Generated Text: ${data.results[model]['generated_text']}</p>
+                        <p><span class=select-model>Input Prompt</span> <span class=input-seq>${inputSentence}</span></p>
+                        <p class=outputs generated-text> <span class=select-model>Generated Text</span> <span>${data.results[model]['generated_text']}<i class="fas fa-question-circle tooltip-icon" data-tooltip="Generated Text is the output string that the model actually generated based on the Input Prompt."></i></span></p>
                         <div class=scores>
-                            <span>ROUGE-1 Score: ${data.results[model]['rouge_score']['rouge1'][2].toFixed(3)}</span>
-                            <span>ROUGE-2 Score: ${data.results[model]['rouge_score']['rouge2'][2].toFixed(3)}</span>
-                            <span>ROUGE-L Score: ${data.results[model]['rouge_score']['rougeL'][2].toFixed(3)}</span>
-                            <span>BLEURT Score: ${data.results[model]['bleurt_score'].toFixed(3)}</span>
+                            <span>ROUGE-1 Score: ${data.results[model]['rouge_score']['rouge1'][2].toFixed(3)}<i class="fas fa-question-circle tooltip-icon" data-tooltip="ROUGE-1 measures the overlap of unigrams (single words) between the generated text and the predicted output. Higher scores indicate more overlap, with a range of 0 to 1. A score of 1 means perfect overlap."></i></span>
+                            <span>ROUGE-2 Score: ${data.results[model]['rouge_score']['rouge2'][2].toFixed(3)}<i class="fas fa-question-circle tooltip-icon" data-tooltip="ROUGE-2 measures the overlap of bigrams (pairs of words) between the generated text and the predicted output. Higher scores indicate more overlap, with a range of 0 to 1. A score of 1 means perfect overlap."></i></span>
+                            <span>ROUGE-L Score: ${data.results[model]['rouge_score']['rougeL'][2].toFixed(3)}<i class="fas fa-question-circle tooltip-icon" data-tooltip="ROUGE-L measures the longest matching sequence of words between the generated text and the predicted output using the Longest Common Subsequence (LCS). The range is from 0 to 1, where 1 indicates perfect match."></i></span>
+                            <span>BLEU Score: ${data.results[model]['bleu_score'].toFixed(3)}<i class="fas fa-question-circle tooltip-icon" data-tooltip="BLEU (Bilingual Evaluation Understudy) measures the precision of n-grams in the generated text compared to the predicted output. The range is from 0 to 1, where higher scores indicate more n-gram overlap."></i></span>
+                            <span>BLEURT Score: ${data.results[model]['bleurt_score'].toFixed(3)}<i class="fas fa-question-circle tooltip-icon" data-tooltip="BLEURT (BERT-based Language Understanding Evaluation with Transformers) is a learned metric that measures semantic similarity between generated and predicted output. It can return negative scores, with higher scores indicating better similarity and fluency. A score closer to 1 means higher similarity."></i></span>
                         </div>
                         `);
 
@@ -374,7 +376,7 @@ textareas.each(function() {
     // 1. 단어 클릭 핸들러 설정 함수
     function setupWordClickHandler(data, model_list) {
         // 문장 선택
-        const sentenceSpan = $('body > div.container > div.main.item > div.result > div > p > span');
+        const sentenceSpan = $('body > div.container > div.main.item > div.result > div > p > span.predicted');
         const sentenceText = sentenceSpan.text();
 
         // 2. 문장을 단어로 분할하고 클릭 가능하게 설정
